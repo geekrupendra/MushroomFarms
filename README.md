@@ -33,7 +33,7 @@ Installation Guide
 
 Clone the repository:
 
-git clone https://github.com/yourusername/mushroom-ecommerce.git
+git clone https://github.com/yourusername/MushroomFarms.git
 cd mushroom-ecommerce
 
 Create and activate a virtual environment:
