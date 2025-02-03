@@ -1,0 +1,68 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}My Wishlist - Vedika Farms{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-5">My Wishlist</h1>
+
+    {% if wishlist_items %}
+    <div class="row">
+        {% for item in wishlist_items %}
+        <div class="col-md-4 mb-4">
+            <div class="card product-card h-100">
+                {% if item.product.discount_price %}
+                <div class="offer-badge">Sale!</div>
+                {% endif %}
+                
+                <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">
+                
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ item.product.name }}</h5>
+                    <p class="card-text">{{ item.product.description|truncatewords:20 }}</p>
+                    
+                    <div class="price-block mb-3">
+                        {% if item.product.discount_price %}
+                        <span class="text-muted text-decoration-line-through">₹{{ item.product.price }}</span>
+                        <span class="product-price">₹{{ item.product.discount_price }}</span>
+                        {% else %}
+                        <span class="product-price">₹{{ item.product.price }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="stock-status mb-3 {% if item.product.is_in_stock %}text-success{% else %}text-danger{% endif %}">
+                        <i class="fas {% if item.product.is_in_stock %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                        {{ item.product.stock_status }}
+                    </div>
+                    
+                    <div class="mt-auto">
+                        <div class="d-grid gap-2">
+                            {% if item.product.is_in_stock %}
+                            <form method="post" action="{% url 'add_to_cart' item.product.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            <a href="{% url 'toggle_wishlist' item.product.id %}" class="btn btn-outline-danger">
+                                <i class="fas fa-heart-broken"></i> Remove from Wishlist
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center">
+        <p class="lead">Your wishlist is empty!</p>
+        <a href="{% url 'shop' %}" class="btn btn-primary">
+            <i class="fas fa-shopping-bag"></i> Continue Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

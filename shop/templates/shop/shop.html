@@ -1,0 +1,158 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Shop - Vedika Farms{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5 animate__animated animate__fadeIn">
+        <h1 class="display-4">Our Mushroom Collection</h1>
+        <p class="lead">Discover our premium quality, farm-fresh mushrooms</p>
+    </div>
+
+    <!-- Offers Section -->
+    <div class="offer-section mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="offer-card">
+                        <h3><i class="fas fa-tags"></i> Special Offer</h3>
+                        <p>Buy 3 Get 1 Free on all Button Mushrooms</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="offer-card">
+                        <h3><i class="fas fa-percent"></i> Bulk Discount</h3>
+                        <p>20% off on orders above ₹2000</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="offer-card">
+                        <h3><i class="fas fa-truck"></i> Free Delivery</h3>
+                        <p>On orders above ₹1500</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active" data-filter="all">All</button>
+                <button type="button" class="btn btn-outline-primary" data-filter="gourmet">Gourmet</button>
+                <button type="button" class="btn btn-outline-primary" data-filter="medicinal">Medicinal</button>
+                <button type="button" class="btn btn-outline-primary" data-filter="exotic">Exotic</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4 product-item {{ product.category }}">
+            <div class="product-card">
+                {% if product.discount_price %}
+                <div class="offer-badge">Sale!</div>
+                {% endif %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="product-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="price-block">
+                            {% if product.discount_price %}
+                            <span class="text-muted text-decoration-line-through">₹{{ product.price }}</span>
+                            <span class="product-price">₹{{ product.discount_price }}</span>
+                            {% else %}
+                            <span class="product-price">₹{{ product.price }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="stock-status {% if product.stock > 10 %}text-success{% elif product.stock > 0 %}text-warning{% else %}text-danger{% endif %}">
+                            <i class="fas fa-{% if product.stock > 10 %}check{% elif product.stock > 0 %}clock{% else %}times{% endif %}-circle"></i>
+                            {{ product.stock_status }}
+                        </div>
+                    </div>
+                    <button class="btn btn-primary add-to-cart-btn" onclick="addToCart({{ product.id }})">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="lead">No products available at the moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add to Cart Animation Container -->
+<div id="cart-animation-container"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter functionality
+    document.querySelectorAll('[data-filter]').forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // Update active button
+            document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter products
+            document.querySelectorAll('.product-item').forEach(item => {
+                if (filter === 'all' || item.classList.contains(filter)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Add to Cart Animation
+    function addToCart(productId) {
+        const button = event.target;
+        const buttonRect = button.getBoundingClientRect();
+        const cartIcon = document.querySelector('.fa-shopping-cart');
+        const cartRect = cartIcon.getBoundingClientRect();
+
+        // Create animation element
+        const animationElement = document.createElement('div');
+        animationElement.className = 'cart-animation';
+        animationElement.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+        animationElement.style.left = `${buttonRect.left}px`;
+        animationElement.style.top = `${buttonRect.top}px`;
+
+        // Add to DOM
+        document.getElementById('cart-animation-container').appendChild(animationElement);
+
+        // Animate to cart
+        setTimeout(() => {
+            animationElement.style.left = `${cartRect.left}px`;
+            animationElement.style.top = `${cartRect.top}px`;
+            animationElement.style.transform = 'scale(0)';
+        }, 0);
+
+        // Remove animation element
+        setTimeout(() => {
+            animationElement.remove();
+        }, 1000);
+
+        // Update button state
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-check"></i> Added';
+        
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+        }, 2000);
+    }
+</script>
+{% endblock %}
